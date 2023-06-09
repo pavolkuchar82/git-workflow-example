@@ -1,1 +1,162 @@
+R-SCMWP-B02
+interface Serial5/1
+ description *** link to R-FRWMI801-A51
+ ip verify unicast reverse-path
+ ip ospf message-digest-key 1 md5 core-controlroom
+ ip ospf cost 1
+ ip ospf hello-interval 1
+ ip ospf dead-interval 3
 
+
+router ospf 63
+ no passive-interface Serial5/1
+
+
+interface Serial5/1
+ no ip rip authentication mode md5
+ no ip rip authentication key-chain PSRCP
+
+
+R-SCMWH-B02
+interface Serial5/1
+ description *** link to R-FRWMI801-A51
+ip verify unicast reverse-path
+ ip ospf message-digest-key 1 md5 core-controlroom
+ ip ospf cost 1
+ ip ospf hello-interval 1
+ ip ospf dead-interval 3
+
+
+router ospf 63
+ no passive-interface Serial5/1
+
+interface Serial5/1
+ no ip rip authentication mode md5
+ no ip rip authentication key-chain PSRCP
+
+
+-----------------------------------------------------
+ 1) cry key gen rsa mod 2048 label R-FRWMI801-A51-CA
+
+2) crypto pki authenticate CSZ01-CA
+
+3) add crypto to vlans for A51 router
+
+interface vlan3708
+ crypto map CMAP-DCS3708
+!
+interface vlan3858
+ crypto map CMAP-DCS3858
+!
+interface vlan3674
+ crypto map CMAP-DCS3674
+!
+3) add cryprto for Dist Routers
+R-RSMED-C43
+interface vlan3708
+ crypto map CMAP-CONTROL-ROOM_VLAN3708
+!
+R-RSMWA-A41
+interface vlan3858
+ crypto map CMAP-CONTROL-ROOM_VLAN3858
+!
+R-RSDRF-A41
+interface vlan3674
+ crypto map CMAP-CONTROL-ROOM_VLAN3674
+!
+
+
+
+
+aaa config
+---------------
+enable algorithm-type scrypt secret BzcFkJwmyU5duUvf
+username admin privilege 15 algorithm-type scrypt secret AgcTOtRp4tfjs7K8
+
+no ip http server
+aaa group server tacacs+ Mgmt
+ server-private 10.91.41.46 timeout 5 key 0 gQvamgoJr29DYvpY
+ server-private 10.91.25.46 timeout 5 key 0 gQvamgoJr29DYvpY
+ server-private 10.91.41.47 timeout 5 key 0 gQvamgoJr29DYvpY
+ server-private 10.91.25.47 timeout 5 key 0 gQvamgoJr29DYvpY
+ ip tacacs source-interface Loopback0
+
+line con 0
+exec-timeout 5 0
+timeout login response 90
+line aux 0
+transport input none
+line vty 0 4
+exec-timeout 5 0
+timeout login response 90
+transport input none
+transport input ssh
+line vty 5 15
+exec-timeout 5 0
+timeout login response 90
+transport input none
+
+aaa authentication login default group Mgmt local
+aaa authentication enable default group Mgmt enable
+aaa authorization exec default group Mgmt if-authenticated
+
+----------------------------------------------------------------------------------------
+!LOG OFF AND AUTHENTICATE USING AAA CREDENTIALS
+----------------------------------------------------------------------------------------
+!
+aaa authorization commands 0 default group Mgmt if-authenticated
+aaa authorization commands 1 default group Mgmt if-authenticated
+aaa authorization commands 2 default group Mgmt if-authenticated
+aaa authorization commands 3 default group Mgmt if-authenticated
+aaa authorization commands 4 default group Mgmt if-authenticated
+aaa authorization commands 5 default group Mgmt if-authenticated
+aaa authorization commands 6 default group Mgmt if-authenticated
+aaa authorization commands 7 default group Mgmt if-authenticated
+aaa authorization commands 8 default group Mgmt if-authenticated
+aaa authorization commands 9 default group Mgmt if-authenticated
+aaa authorization commands 10 default group Mgmt if-authenticated
+aaa authorization commands 11 default group Mgmt if-authenticated
+aaa authorization commands 12 default group Mgmt if-authenticated
+aaa authorization commands 13 default group Mgmt if-authenticated
+aaa authorization commands 14 default group Mgmt if-authenticated
+aaa authorization commands 15 default group Mgmt if-authenticated
+aaa authorization configuration default group Mgmt
+!
+aaa accounting exec default start-stop group Mgmt
+aaa accounting commands 0 default start-stop group Mgmt
+aaa accounting commands 1 default start-stop group Mgmt
+aaa accounting commands 2 default start-stop group Mgmt
+aaa accounting commands 3 default start-stop group Mgmt
+aaa accounting commands 4 default start-stop group Mgmt
+aaa accounting commands 5 default start-stop group Mgmt
+aaa accounting commands 6 default start-stop group Mgmt
+aaa accounting commands 7 default start-stop group Mgmt
+aaa accounting commands 8 default start-stop group Mgmt
+aaa accounting commands 9 default start-stop group Mgmt
+!
+aaa accounting commands 10 default start-stop group Mgmt
+aaa accounting commands 11 default start-stop group Mgmt
+aaa accounting commands 12 default start-stop group Mgmt
+aaa accounting commands 13 default start-stop group Mgmt
+aaa accounting commands 14 default start-stop group Mgmt
+aaa accounting commands 15 default start-stop group Mgmt
+aaa accounting connection default start-stop group Mgmt
+aaa accounting system default start-stop group Mgmt
+!
+aaa authorization console
+aaa authorization config-commands
+!
+line console 0
+no privilege level 15
+line vty 0 15
+no privilege level 15
+line aux 0
+no privilege level 15
+!
+line console 0
+no password
+line vty 0 15
+no password
+line aux 0
+no password
+!
